@@ -11,9 +11,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins (GitHub Pages, localhost, etc.)
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist')));
 
 // ── Groq AI Configuration ────────────────────────────────────
 const k1 = "gsk_H9Jl2cVxI";
@@ -170,12 +173,13 @@ app.post('/api/save-debate', async (req, res) => {
   }
 });
 
-// Serve index.html for all other routes (SPA support)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+// API 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'API endpoint not found. Use /api/health, /api/debate, or /api/analyze' });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 AI Debate Server running on http://localhost:${PORT}`);
+  console.log(`🚀 AI Debate API Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🎯 CORS enabled for all origins (GitHub Pages compatible)`);
 });

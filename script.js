@@ -1,6 +1,10 @@
 // ── Configuration ──────────────────────────────────────────────
-// Use relative URL - works with both Vite dev proxy and production
-const API_BASE_URL = '/api';
+// Backend API URL - change this to your deployed backend
+// Local development: 'http://localhost:3000/api'
+// GitHub Pages + Render backend: 'https://your-app.onrender.com/api'
+const API_BASE_URL = window.location.hostname.includes('localhost') 
+  ? 'http://localhost:3000/api'
+  : 'https://ai-debate-api.onrender.com/api';
 
 // ── Supabase (for client-side history loading) ─────────────────
 const SUPABASE_URL = "https://jnsrzkunpopiergtbttc.supabase.co";
