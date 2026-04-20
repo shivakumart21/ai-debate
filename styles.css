@@ -4,11 +4,14 @@
   --bg-primary: #0a0a0f;
   --bg-secondary: #13141f;
   --bg-panel: rgba(20, 21, 35, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.05);
   --text-primary: #ffffff;
   --text-secondary: #a0a5cc;
+  --text: #ffffff;
   --accent-cyan: #00f0ff;
   --accent-purple: #8a2be2;
   --accent-pink: #ff0055;
+  --border-color: rgba(255, 255, 255, 0.1);
   
   --gradient-ai: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
   --gradient-human: linear-gradient(135deg, var(--accent-cyan), #00ff88);

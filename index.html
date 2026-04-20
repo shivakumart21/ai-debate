@@ -1,13 +1,259 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Debate Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Debate Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  
+  <header>
+    <div class="logo" onclick="goHome()">
+      <span>⚖️</span>
+      <span class="text-gradient">DebateAI</span>
+    </div>
+    <div class="nav-links">
+      <button class="btn btn-secondary" onclick="showHistory()">📜 History</button>
+      <button class="btn btn-secondary" onclick="goHome()">Home</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Home View -->
+    <div id="home-view" class="hero">
+      <h1>Welcome to the <br><span class="text-gradient">Ultimate AI Debate Platform</span></h1>
+      <p>Explore complex topics through structured debates. Choose your mode and witness the power of logical argumentation powered by AI.</p>
+      
+      <div class="modes-grid">
+        <!-- AI vs AI Mode -->
+        <div class="glass-panel mode-card" onclick="startDebate('ai-vs-ai')">
+          <div class="mode-icon">🤖 ⚡ 🤖</div>
+          <h3>AI vs AI</h3>
+          <p>Watch two distinct AI personas debate complex topics from opposing perspectives. Perfect for exploring all sides of an issue without bias.</p>
+          <button class="btn btn-primary">Start AI Battle</button>
+        </div>
+
+        <!-- Human vs AI Mode -->
+        <div class="glass-panel mode-card" onclick="startDebate('human-vs-ai')">
+          <div class="mode-icon">👤 ⚡ 🤖</div>
+          <h3>Human vs AI</h3>
+          <p>Test your critical thinking skills. Present your arguments and get real-time counter-arguments from an advanced AI system.</p>
+          <button class="btn btn-primary">Challenge AI</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arena View -->
+    <div id="arena-view">
+      <div class="arena-header">
+        <h2>Debate Arena: <span class="text-gradient" id="arena-mode-title">AI vs AI</span></h2>
+        <button class="btn btn-secondary" onclick="goHome()">End Debate</button>
+      </div>
+
+      <div class="topic-input-container" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; flex: 1; position: relative; width: 100%;">
+          <input type="text" id="topic-input" class="input-glass" style="width: 100%; padding-right: 3rem;" placeholder="Enter a debate topic (e.g., 'Is Artificial General Intelligence a threat?')" />
+          <button 
+            id="mic-topic-btn"
+            class="btn btn-secondary" 
+            onclick="startListeningVanilla('topic-input', 'mic-topic-btn', event)"
+            title="Voice to Text"
+            style="position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%); padding: 0.4rem; border-radius: 50%; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center;"
+          >🎤</button>
+        </div>
+        <button class="btn btn-primary" onclick="initiateDebate()">Begin Match</button>
+      </div>
+
+      <div id="save-banner" style="display:none;" class="save-banner"></div>
+
+      <!-- Logic Score Panel -->
+      <div id="score-panel" class="score-panel" style="display:none;">
+        <div class="score-panel-header">
+          <span>📊</span>
+          <h3>Argument Analysis</h3>
+        </div>
+        <div id="score-loading" class="score-loading" style="display:none;">
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+          <span>AI analyzing argument quality...</span>
+        </div>
+        <div id="score-body" class="score-body" style="display:none;">
+          <div class="score-split">
+            <!-- Pro Side Scores -->
+            <div class="score-side">
+              <div class="score-side-title">
+                <span id="score-pro-icon">🤖</span>
+                <span class="score-badge pro" id="score-pro-label">Proponent</span>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">
+                  <span>Logic & Reasoning</span>
+                  <span class="score-val" id="pro-logic-val">0/10</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill pro" id="pro-logic-bar"></div>
+                </div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">
+                  <span>Evidence & Facts</span>
+                  <span class="score-val" id="pro-evidence-val">0/10</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill pro" id="pro-evidence-bar"></div>
+                </div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">
+                  <span>Persuasiveness</span>
+                  <span class="score-val" id="pro-persuasion-val">0/10</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill pro" id="pro-persuasion-bar"></div>
+                </div>
+              </div>
+              <div class="score-overall">
+                <div class="score-overall-number pro" id="pro-overall">0.0</div>
+                <div class="score-overall-label">Overall Score<br>out of 10</div>
+              </div>
+            </div>
+
+            <!-- Con Side Scores -->
+            <div class="score-side">
+              <div class="score-side-title">
+                <span>🤖</span>
+                <span class="score-badge con">Opponent</span>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">
+                  <span>Logic & Reasoning</span>
+                  <span class="score-val" id="con-logic-val">0/10</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill con" id="con-logic-bar"></div>
+                </div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">
+                  <span>Evidence & Facts</span>
+                  <span class="score-val" id="con-evidence-val">0/10</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill con" id="con-evidence-bar"></div>
+                </div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">
+                  <span>Persuasiveness</span>
+                  <span class="score-val" id="con-persuasion-val">0/10</span>
+                </div>
+                <div class="score-bar-track">
+                  <div class="score-bar-fill con" id="con-persuasion-bar"></div>
+                </div>
+              </div>
+              <div class="score-overall">
+                <div class="score-overall-number con" id="con-overall">0.0</div>
+                <div class="score-overall-label">Overall Score<br>out of 10</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Verdict -->
+          <div class="verdict-box" id="verdict-box" style="display:none;">
+            <div class="verdict-icon">⚖️</div>
+            <div class="verdict-text" id="verdict-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="debate-stage">
+        <div class="stage-split">
+          <!-- Pro Side (Left) -->
+          <div class="glass-panel debater-box pro-side">
+            <div class="debater-header">
+              <div class="debater-icon" id="pro-icon">🟢</div>
+              <div>
+                <h3 id="pro-title">Proponent (AI)</h3>
+                <span style="color:var(--text-secondary); font-size:0.9rem">Defending the topic</span>
+              </div>
+            </div>
+            <div class="debater-content" id="pro-content">
+              <p style="color: rgba(255,255,255,0.5); font-style: italic;">Awaiting topic...</p>
+            </div>
+            <div style="position: relative; margin-top: 1rem; width: 100%;">
+              <textarea id="human-input-pro" class="input-glass debater-input" placeholder="Type your argument here..." style="display: none; width: 100%; min-height: 100px; padding-right: 3rem;"></textarea>
+              <button 
+                  id="mic-arg-btn"
+                  class="btn btn-secondary"
+                  onclick="startListeningVanilla('human-input-pro', 'mic-arg-btn', event)"
+                  title="Voice to Text"
+                  style="display: none; position: absolute; right: 0.5rem; bottom: 0.5rem; padding: 0.4rem; border-radius: 50%; background: var(--glass-bg); border: 1px solid var(--border-color); color: var(--text); cursor: pointer; align-items: center; justify-content: center; z-index: 10;"
+              >🎤</button>
+            </div>
+            <button id="human-submit-btn" class="btn btn-secondary" style="margin-top: 0.5rem; display: none;" onclick="submitHumanArgument()">Submit Argument</button>
+          </div>
+
+          <!-- Con Side (Right) -->
+          <div class="glass-panel debater-box con-side">
+            <div class="debater-header">
+              <div class="debater-icon" id="con-icon">🔴</div>
+              <div>
+                <h3 id="con-title">Opponent (AI)</h3>
+                <span style="color:var(--text-secondary); font-size:0.9rem">Opposing the topic</span>
+              </div>
+            </div>
+            <div class="debater-content" id="con-content">
+              <p style="color: rgba(255,255,255,0.5); font-style: italic;">Awaiting topic...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History View -->
+    <div id="history-view" style="display:none;" class="history-container">
+      <div class="history-header">
+        <div>
+          <h2>📜 <span class="text-gradient">Debate History</span></h2>
+          <p style="color:var(--text-secondary); font-family:'Inter'; margin-top:0.3rem;">All saved debates from the platform</p>
+        </div>
+        <button class="btn btn-secondary" onclick="goHome()">← Back Home</button>
+      </div>
+      <div id="history-loading" class="typing-indicator" style="text-align:center;padding:2rem;">Loading debates...</div>
+      <div id="history-grid" class="history-grid" style="display:none;"></div>
+      <div id="history-detail" style="display:none;"></div>
+    </div>
+  </main>
+
+  <footer style="padding: 2rem 1rem;">
+    <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--text);">Developed By</h3>
+    <div class="contact-info" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 3rem; border-top: none; padding: 0;">
+      <div style="text-align: center;">
+        <div class="contact-name" style="font-size: 1.1rem; font-weight: 600;">1. Shivakumar T</div>
+        <div class="contact-details" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: center;">
+          <span>📞 63632111415</span>
+          <span>✉️ shivut212121@gmail.com</span>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <div class="contact-name" style="font-size: 1.1rem; font-weight: 600;">2. Namratha K B</div>
+        <div class="contact-details" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: center;">
+          <span>📞 7483337155</span>
+          <span>✉️ namrathakb72@gmail.com</span>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <div class="contact-name" style="font-size: 1.1rem; font-weight: 600;">3. Hemalatha N K</div>
+        <div class="contact-details" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; align-items: center;">
+          <span>📞 6361057647</span>
+          <span>✉️ hemag1026@gmail.com</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script type="module" src="./script.js"></script>
+</body>
 </html>
