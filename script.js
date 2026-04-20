@@ -30,16 +30,33 @@ async function callAI(systemPrompt, userPrompt) {
       })
     });
     
+    const responseText = await response.text();
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP ${response.status}`);
+      // Check if response is HTML (starts with <)
+      if (responseText.trim().startsWith('<')) {
+        throw new Error(`Backend not available (HTTP ${response.status}). Please run 'npm run server' locally, or the API is not deployed.`);
+      }
+      // Try to parse as JSON for structured error
+      try {
+        const errorData = JSON.parse(responseText);
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      } catch {
+        throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 100)}`);
+      }
     }
     
-    const data = await response.json();
-    return data.content;
+    // Try to parse successful response
+    try {
+      const data = JSON.parse(responseText);
+      return data.content || data;
+    } catch {
+      // If not JSON, return raw text
+      return responseText;
+    }
   } catch (error) {
     console.error("AI Error:", error);
-    return `Error: ${error.message}. Please ensure the backend server is running (npm run server).`;
+    return `Error: ${error.message}`;
   }
 }
 
@@ -351,17 +368,33 @@ async function analyzeArgument(argument, topic, side) {
       })
     });
     
+    const responseText = await response.text();
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP ${response.status}`);
+      // Check if response is HTML (starts with <)
+      if (responseText.trim().startsWith('<')) {
+        throw new Error('Backend not available');
+      }
+      // Try to parse as JSON
+      try {
+        const errorData = JSON.parse(responseText);
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      } catch {
+        throw new Error(`HTTP ${response.status}`);
+      }
     }
     
-    const scores = await response.json();
-    return scores;
+    // Parse successful response
+    try {
+      const scores = JSON.parse(responseText);
+      return scores;
+    } catch {
+      return { logic: 5, evidence: 5, persuasion: 5, brief: "Parse error" };
+    }
   } catch (error) {
     console.error("Score analysis error:", error);
     // Fallback scores
-    return { logic: 5, evidence: 5, persuasion: 5, brief: "Analysis unavailable" };
+    return { logic: 5, evidence: 5, persuasion: 5, brief: "Analysis unavailable - backend offline" };
   }
 }
 
